@@ -1,69 +1,65 @@
+import { Format } from './format'
 
-
-function fixstr(str: string): Buffer {
+function fixStr(str: string): Buffer {
     if ( str.length > 31) throw new Error("length must be lower than 32")
 
-    const size = Buffer.from((str.length + 160).toString(16), 'hex');
+    const size = Buffer.alloc(1); size.writeUInt8(Format.FIX_STR + str.length);
     const value = Buffer.from(str);
 
     return Buffer.concat([size, value]);
 }
 
 function str8(str: string): any {
-    const typeNum = 'd9' // 0xD9
     const buf = Buffer.alloc(2);
-    buf.write(typeNum, 'hex')
+    buf.write(Format.STR_8, 'hex')
     buf.writeUInt8(str.length, 1)
     const value = Buffer.from(str);
     return Buffer.concat([buf, value]);
 }
 
 function str16(str: string): any {
-    const typeNum = 'da' // 0xDa
     const buf = Buffer.alloc(3);
-    buf.write(typeNum, 'hex')
+    buf.write(Format.STR_16, 'hex')
     buf.writeUInt16BE(str.length, 1)
     const value = Buffer.from(str);
     return Buffer.concat([buf, value]);
 }
 
 function str32(str: string): any {
-    const typeNum = 'db' // 0xDB
     const buf = Buffer.alloc(5);
-    buf.write(typeNum, 'hex')
+    buf.write(Format.STR_32, 'hex')
     buf.writeUInt32BE(str.length, 1)
     const value = Buffer.from(str);
+
     return Buffer.concat([buf, value]);
 }
 
 function int8(val: number): Buffer {
-    const typeNum = 'd0'; // 0xD1
-    const result = Buffer.alloc(2)
-    result.write(typeNum, 'hex');
-    result.writeInt8(val, 1);
-    return result;
+    const res = Buffer.alloc(2)
+    res.write(Format.INT_8, 'hex');
+    res.writeInt8(val, 1);
+    return res;
 }
 
 function int16(val: number): Buffer {
-    const typeNum = 'd1'; // 0xD1
-    const result = Buffer.alloc(3)
-    result.write(typeNum, 'hex');
-    result.writeInt16BE(val, 1);
-    return result;
+    const res = Buffer.alloc(3)
+    res.write(Format.INT_16, 'hex');
+    res.writeInt16BE(val, 1);
+
+    return res;
 }
 
 function int32(val: number): Buffer {
-    const typeNum = 'd2'; // 0xD2
-    const result = Buffer.alloc(5)
-    result.write(typeNum, 'hex');
-    result.writeInt32BE(val, 1);
-    return result;
+    const res = Buffer.alloc(5)
+    res.write(Format.INT_32, 'hex');
+    res.writeInt32BE(val, 1);
+
+    return res;
 }
 
 function bin8(binStr: string): Buffer {
-    const typeNum = 'c4'; // 0xC4
     const buf = Buffer.alloc(2);
-    buf.write(typeNum, 'hex')
+    buf.write(Format.BIN_8, 'hex')
     buf.writeUInt8(binStr.length, 1)
 
     const valBuf = Buffer.from(binStr, 'binary');
@@ -73,52 +69,52 @@ function bin8(binStr: string): Buffer {
 
 function fixArray(arr: any[]) {
     if (arr.length > 15) throw new Error('number of elements must be lower than 16!');
-    const typeNum = 144 + arr.length; // 0x90 to 0x9f
-    let res = Buffer.alloc(1); res.writeUInt8(typeNum);
+    let res = Buffer.alloc(1); res.writeUInt8(Format.FIX_ARRAY + arr.length);
 
     for (let element of arr) {
         res = Buffer.concat([res, pack(element)]);
     }
+
     return res;
 }
 
 function array16(arr: any[]): Buffer {
-    const typeNum = '0xdc' // 0xDC
     let res = Buffer.alloc(3);
-    res.write(typeNum, 'hex')
+    res.write(Format.ARRAY_16, 'hex')
     res.writeUInt16BE(arr.length, 1);
 
     for (let element of arr) {
         res = Buffer.concat([res, pack(element)]);
     }
+
     return res;
 }
 
 function array32(arr: any[]): Buffer {
-    const typeNum = '0xdd' // 0xDD
     let res = Buffer.alloc(5);
-    res.write(typeNum, 'hex')
+    res.write(Format.ARRAY_32, 'hex')
     res.writeUInt16BE(arr.length, 1);
 
     for (let element of arr) {
         res = Buffer.concat([res, pack(element)]);
     }
+
     return res;
 }
 
 function float32(val: number): Buffer {
-    const typeNum = 'ca'; // 0xCA
-    const result = Buffer.alloc(5)
-    result.write(typeNum, 'hex');
-    result.writeFloatBE(val, 1);
-    return result;
+    const res = Buffer.alloc(5)
+    res.write(Format.FLOAT_32, 'hex');
+    res.writeFloatBE(val, 1);
+
+    return res;
 }
 
 function fixMap(obj: object): Buffer {
     const propsCount = Object.keys(obj).length
-    if (propsCount> 15) throw new Error('number of elements must be lower than 16!');
-    const typeNum = 128 + propsCount; // 0x80 to 0x8f
-    let res = Buffer.alloc(1); res.writeUInt8(typeNum);
+    if (propsCount > 15) throw new Error('number of elements must be lower than 16!');
+
+    let res = Buffer.alloc(1); res.writeUInt8(Format.FIX_MAP + propsCount);
 
     for (const [key, value] of Object.entries(obj)) {
         res = Buffer.concat([res, parseStr(key), pack(value)])
@@ -128,11 +124,12 @@ function fixMap(obj: object): Buffer {
 }
 
 function map16(obj: object): Buffer {
-    const typeNum = '0xde' // 0xDE
     const propsCount = Object.keys(obj).length
     let res = Buffer.alloc(3);
-    res.write(typeNum, 'hex')
+
+    res.write(Format.MAP_16, 'hex')
     res.writeUInt16BE(propsCount, 1);
+
     for (const [key, value] of Object.entries(obj)) {
         res = Buffer.concat([res, parseStr(key), pack(value)])
     }
@@ -141,11 +138,12 @@ function map16(obj: object): Buffer {
 }
 
 function map32(obj: object): Buffer {
-    const typeNum = '0xde' // 0xDE
     const propsCount = Object.keys(obj).length
     let res = Buffer.alloc(5);
-    res.write(typeNum, 'hex')
+
+    res.write(Format.MAP_32, 'hex')
     res.writeUInt32BE(propsCount, 1);
+
     for (const [key, value] of Object.entries(obj)) {
         res = Buffer.concat([res, parseStr(key), pack(value)])
     }
@@ -154,7 +152,7 @@ function map32(obj: object): Buffer {
 }
 
 function parseStr(str: string): Buffer {
-    if (inRange(4)) return fixstr(str);
+    if (inRange(4)) return fixStr(str);
     if (inRange(8)) return str8(str);
     if (inRange(16)) return str16(str);
     if (inRange(32)) return str32(str);
@@ -204,11 +202,11 @@ function parseArray(arr: any[]): Buffer {
 }
 
 function parseBool(val: boolean): Buffer {
-    return  val ? Buffer.from('c3', 'hex') : Buffer.from('c2', 'hex');
+    return  val ? Buffer.from(Format.BOOL_TRUE, 'hex') : Buffer.from(Format.BOOL_FALSE, 'hex');
 }
 
 function parseNil(val: null | undefined): Buffer {
-    return Buffer.from('c0', 'hex');
+    return Buffer.from(Format.NIL, 'hex');
 }
 
 
