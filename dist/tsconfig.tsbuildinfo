@@ -157,13 +157,28 @@
         "affectsGlobalScope": true
       },
       "../format.ts": {
-        "version": "3f24f7833fce3fd9e0a939fba6d8156f540f7befbdf52dcd0ae19b0a17de2183",
+        "version": "e1150b6341148f003a3189077d4b46e228db3466e2b8603e4310a998c6c5fb52",
         "signature": "13b21580f9a80d257987826737c2e3bc4d491ba163e90a0bda034ac7e8a36299",
         "affectsGlobalScope": false
       },
+      "../deserializer.ts": {
+        "version": "2caf33175829c82f79e9c819c6126a9ea30c59bdaea2f7f9ba59f91ae3a9c708",
+        "signature": "42a7bd0b16e16b5897bb51f78b9f0a825876aaba7703f11c51fca616a1f7045d",
+        "affectsGlobalScope": false
+      },
+      "../serializer.ts": {
+        "version": "aa11b4da75c6c68d8a75040e60182c84a0e56adf67c1cb1fa4bbcf0101c2e5e3",
+        "signature": "7e4ba0a12cf038c81c62d54cd5a6a559d58a86ffcd8f62ac096df05005c7a690",
+        "affectsGlobalScope": false
+      },
       "../index.ts": {
-        "version": "2afa53fd1aef49bcce1feb684ecff21135059890d7225410e052cc11f3dcccc4",
+        "version": "2de8044b43ada13ef045a27c44154d86456c1012ebcc67cf7c53ec0bf69de609",
         "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "affectsGlobalScope": false
+      },
+      "../types.ts": {
+        "version": "1b6be440f574587f10bf40fbdb2c66dfd447883dc86306f74aba3448d827e80c",
+        "signature": "5fc44f22c097ca2ec4697940096183687950ebed2b0b4bbffc9173030c6b80a7",
         "affectsGlobalScope": false
       },
       "../node_modules/@types/node/globals.d.ts": {
@@ -411,8 +426,12 @@
       "configFilePath": "../tsconfig.json"
     },
     "referencedMap": {
-      "../index.ts": [
+      "../deserializer.ts": [
         "../format.ts"
+      ],
+      "../index.ts": [
+        "../deserializer.ts",
+        "../serializer.ts"
       ],
       "../node_modules/@types/node/assert.d.ts": [
         "../node_modules/@types/node/assert.d.ts"
@@ -641,6 +660,9 @@
       "../node_modules/@types/node/zlib.d.ts": [
         "../node_modules/@types/node/stream.d.ts",
         "../node_modules/@types/node/zlib.d.ts"
+      ],
+      "../serializer.ts": [
+        "../format.ts"
       ]
     },
     "exportedModulesMap": {
@@ -874,6 +896,7 @@
       ]
     },
     "semanticDiagnosticsPerFile": [
+      "../deserializer.ts",
       "../format.ts",
       "../index.ts",
       "../node_modules/@types/node/assert.d.ts",
@@ -922,6 +945,8 @@
       "../node_modules/@types/node/wasi.d.ts",
       "../node_modules/@types/node/worker_threads.d.ts",
       "../node_modules/@types/node/zlib.d.ts",
+      "../serializer.ts",
+      "../types.ts",
       "../../../../../../usr/local/lib/node_modules/typescript/lib/lib.d.ts",
       "../../../../../../usr/local/lib/node_modules/typescript/lib/lib.dom.d.ts",
       "../../../../../../usr/local/lib/node_modules/typescript/lib/lib.es2015.collection.d.ts",
