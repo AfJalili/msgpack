@@ -1,13 +1,14 @@
-import { Format } from './format';
+import { format } from './format';
 
 export function pack(value: any): Buffer {
   const valType: string = typeof value;
+  if (valType === 'boolean') return parseBool(value);
   if (!value && value !== 0) return parseNil(value);
   if (Array.isArray(value)) return parseArray(value);
   if (valType === 'object') return parseMap(value);
   if (valType === 'string') return parseStr(value);
   if (valType === 'number') return parseNum(value);
-  if (valType === 'boolean') return parseBool(value);
+
 }
 
 function parseStr(str: string): Buffer {
@@ -39,7 +40,7 @@ function parseNum(num: number): Buffer {
 }
 
 function parseMap(obj: object): Buffer {
-  if (inRange(4)) return fixMap(obj);
+  if (inRange(4)) return fixmap(obj);
   if (inRange(16)) return map16(obj);
   if (inRange(32)) return map32(obj);
   throw new Error('provided object has too many properties!');
@@ -50,7 +51,7 @@ function parseMap(obj: object): Buffer {
 }
 
 function parseArray(arr: any[]): Buffer {
-  if (inRange(4)) return fixArray(arr);
+  if (inRange(4)) return fixarray(arr);
   if (inRange(16)) return array16(arr);
   if (inRange(32)) return array32(arr);
   throw new Error('provided array has too many elements!');
@@ -61,18 +62,19 @@ function parseArray(arr: any[]): Buffer {
 }
 
 function parseBool(val: boolean): Buffer {
-  return val ? Buffer.from(Format.BOOL_TRUE, 'hex') : Buffer.from(Format.BOOL_FALSE, 'hex');
+  console.log(val)
+  return val ? Buffer.from(format.true, 'hex') : Buffer.from(format.false, 'hex');
 }
 
 function parseNil(val: null | undefined): Buffer {
-  return Buffer.from(Format.NIL, 'hex');
+  return Buffer.from(format.nil, 'hex');
 }
 
 function fixStr(str: string): Buffer {
   if (str.length > 31) throw new Error('length must be lower than 32');
 
   const size = Buffer.alloc(1);
-  size.writeUInt8(Format.FIX_STR + str.length);
+  size.writeUInt8(format.fixstr + str.length);
   const value = Buffer.from(str);
 
   return Buffer.concat([size, value]);
@@ -80,7 +82,7 @@ function fixStr(str: string): Buffer {
 
 function str8(str: string): any {
   const buf = Buffer.alloc(2);
-  buf.write(Format.STR_8, 'hex');
+  buf.write(format.str8, 'hex');
   buf.writeUInt8(str.length, 1);
   const value = Buffer.from(str);
   return Buffer.concat([buf, value]);
@@ -88,7 +90,7 @@ function str8(str: string): any {
 
 function str16(str: string): any {
   const buf = Buffer.alloc(3);
-  buf.write(Format.STR_16, 'hex');
+  buf.write(format.str16, 'hex');
   buf.writeUInt16BE(str.length, 1);
   const value = Buffer.from(str);
   return Buffer.concat([buf, value]);
@@ -96,7 +98,7 @@ function str16(str: string): any {
 
 function str32(str: string): any {
   const buf = Buffer.alloc(5);
-  buf.write(Format.STR_32, 'hex');
+  buf.write(format.str32, 'hex');
   buf.writeUInt32BE(str.length, 1);
   const value = Buffer.from(str);
 
@@ -105,7 +107,7 @@ function str32(str: string): any {
 
 function int8(val: number): Buffer {
   const res = Buffer.alloc(2);
-  res.write(Format.INT_8, 'hex');
+  res.write(format.int8, 'hex');
   res.writeInt8(val, 1);
 
   return res;
@@ -113,7 +115,7 @@ function int8(val: number): Buffer {
 
 function int16(val: number): Buffer {
   const res = Buffer.alloc(3);
-  res.write(Format.INT_16, 'hex');
+  res.write(format.int16, 'hex');
   res.writeInt16BE(val, 1);
 
   return res;
@@ -121,47 +123,23 @@ function int16(val: number): Buffer {
 
 function int32(val: number): Buffer {
   const res = Buffer.alloc(5);
-  res.write(Format.INT_32, 'hex');
+  res.write(format.int32, 'hex');
   res.writeInt32BE(val, 1);
 
   return res;
 }
 
-function bin8(buffer: Buffer): Buffer {
-  const buf = Buffer.alloc(2);
+function float32(val: number): Buffer {
+  const res = Buffer.alloc(5);
+  res.write(format.float32, 'hex');
+  res.writeFloatBE(val, 1);
 
-  buf.write(Format.BIN_8, 'hex');
-  buf.writeUInt8(buffer.length, 1);
-
-  return Buffer.concat([buf, buffer]);
+  return res;
 }
 
-function bin16(binStr: string): Buffer {
-  const buf = Buffer.alloc(3);
-
-  buf.write(Format.BIN_16, 'hex');
-  buf.writeUInt8(binStr.length, 1);
-
-  const valBuf = Buffer.from(binStr, 'binary');
-
-  return Buffer.concat([buf, valBuf]);
-}
-
-function bin32(binStr: string): Buffer {
-  const buf = Buffer.alloc(5);
-
-  buf.write(Format.BIN_16, 'hex');
-  buf.writeUInt8(binStr.length, 1);
-
-  const valBuf = Buffer.from(binStr, 'binary');
-
-  return Buffer.concat([buf, valBuf]);
-}
-
-function fixArray(arr: any[]) {
-  if (arr.length > 15) throw new Error('number of elements must be lower than 16!');
+function fixarray(arr: any[]) {
   let res = Buffer.alloc(1);
-  res.writeUInt8(Format.FIX_ARRAY + arr.length);
+  res.writeUInt8(format.fixarray + arr.length);
 
   for (let element of arr) {
     res = Buffer.concat([res, pack(element)]);
@@ -172,7 +150,7 @@ function fixArray(arr: any[]) {
 
 function array16(arr: any[]): Buffer {
   let res = Buffer.alloc(3);
-  res.write(Format.ARRAY_16, 'hex');
+  res.write(format.array16, 'hex');
   res.writeUInt16BE(arr.length, 1);
 
   for (let element of arr) {
@@ -184,7 +162,7 @@ function array16(arr: any[]): Buffer {
 
 function array32(arr: any[]): Buffer {
   let res = Buffer.alloc(5);
-  res.write(Format.ARRAY_32, 'hex');
+  res.write(format.array32, 'hex');
   res.writeUInt16BE(arr.length, 1);
 
   for (let element of arr) {
@@ -194,29 +172,19 @@ function array32(arr: any[]): Buffer {
   return res;
 }
 
-function float32(val: number): Buffer {
-  const res = Buffer.alloc(5);
-  res.write(Format.FLOAT_32, 'hex');
-  res.writeFloatBE(val, 1);
 
-  return res;
-}
 
-function fixMap(obj: object): Buffer {
+function fixmap(obj: object): Buffer {
   const propsCount = Object.keys(obj).length;
 
   let res = Buffer.alloc(1);
-  res.writeUInt8(Format.FIX_MAP + propsCount);
+  res.writeUInt8(format.fixmap + propsCount);
 
-  // for ( const key in obj) {
-  //   if(obj.hasOwnProperty(key)) {
-  //     const value = obj[key];
-  //     res = Buffer.concat([res, parseStr(key), pack(value)]);
-  //   }
-  //
-  // }
-  for (const [key, value] of Object.entries(obj)) {
-    res = Buffer.concat([res, parseStr(key), pack(value)]);
+  for ( const key in obj) {
+    if(obj.hasOwnProperty(key)) {
+      const value = obj[key];
+      res = Buffer.concat([res, parseStr(key), pack(value)]);
+    }
   }
 
   return res;
@@ -226,7 +194,7 @@ function map16(obj: object): Buffer {
   const propsCount = Object.keys(obj).length;
   let res = Buffer.alloc(3);
 
-  res.write(Format.MAP_16, 'hex');
+  res.write(format.map16, 'hex');
   res.writeUInt16BE(propsCount, 1);
 
   for (const [key, value] of Object.entries(obj)) {
@@ -241,7 +209,7 @@ function map32(obj: object): Buffer {
   const propsCount = Object.keys(obj).length;
   let res = Buffer.alloc(5);
 
-  res.write(Format.MAP_32, 'hex');
+  res.write(format.map32, 'hex');
   res.writeUInt32BE(propsCount, 1);
 
   for (const [key, value] of Object.entries(obj)) {

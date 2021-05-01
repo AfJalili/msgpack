@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var deserializer_1 = require("./deserializer");
 var serializer_1 = require("./serializer");
-var obj = { a: 1, b: [123] };
+var obj = [false];
 var buf = serializer_1.pack(obj);
 console.log(buf);
 var JSvalue = deserializer_1.unpack(buf);
