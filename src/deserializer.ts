@@ -8,7 +8,6 @@ export function unpack(buffer: Buffer): any {
 
 function parseToJS(buffer: Buffer, start: number = 0): any {
   const type = getType(buffer[start]);
-  console.log(type);
   return Deserializer[type](buffer, start);
 }
 
